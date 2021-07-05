@@ -88,9 +88,6 @@ class Pamac():
             pkgs.append(p)
         return pkgs
 
-    def get_app_icon(self, pkg: object) -> str or None:
-        return self.db.get_pkg(pkg).get_icon()
-
     def get_app_name(self, pkg: str) -> str:
         """
         return application name if available otherwise returns pkg name.
@@ -99,6 +96,110 @@ class Pamac():
         if not name:
             name = self.db.get_pkg(pkg).get_name()
         return name
+
+    def get_pkg_details(self, pkg):
+        p = self.db.get_pkg(pkg)
+        info = {}
+        info["app_id"] = p.get_app_id()
+        info["title"] = p.get_app_name()
+        info["backups"] = p.get_backups()
+        info["build_date"] = p.get_build_date()
+        info["check_depends"] = p.get_checkdepends()
+        info["conflits"] = p.get_conflicts()
+        info["depends"] = p.get_depends()
+        info["description"] = p.get_desc()
+        info["download_size"] = p.get_download_size()
+        info["groups"] = p.get_groups()
+        info["ha_signature"] = p.get_has_signature()
+        info["icon"] = p.get_icon()
+        info["id"] = p.get_id()
+        info["install_date"] = p.get_install_date()
+        info["installed_size"] = p.get_installed_size()
+        info["installed_version"] = p.get_installed_version()
+        info["launchable"] = p.get_launchable()
+        info["license"] = p.get_license()
+        info["long_description"] = p.get_long_desc()
+        info["makedepends"] = p.get_makedepends()
+        info["pkg_name"] = p.get_name()
+        info["optdepends"] = p.get_optdepends()
+        info["optionalfor"] = p.get_optionalfor()
+        info["packager"] = p.get_packager()
+        info["provides"] = p.get_provides()
+        info["reason"] = p.get_reason()
+        info["replaces"] = p.get_replaces()
+        info["repository"] = p.get_repo()
+        info["required_by"] = p.get_requiredby()
+        info["screenshots"] = p.get_screenshots()
+        info["url"] = p.get_url()
+        info["version"] = p.get_version()
+        #info["getv"] = p.getv()
+        #info["data"] = p.get_data()
+        #info["properties"] = p.get_properties()
+        #info["property"] = p.get_property()
+        #info["qdata"] = p.get_qdata()
+
+        return info
+
+    def get_snap_details(self, pkg):
+        info = {}
+        def callback(source_object, result):
+            try:
+                p = source_object.get_snap_finish(result)
+            except GLib.GError as e:
+                print("Error: ", e.message)
+            else:
+                info["app_id"] = p.get_app_id()
+                info["title"] = p.get_app_name()
+                info["channel"] = p.get_channel()
+                info["channels"] = p.get_channels()
+                info["confined"] = p.get_confined()
+                info["description"] = p.get_desc()
+                info["download_size"] = p.get_download_size()
+                info["icon"] = p.get_icon()
+                info["id"] = p.get_id()
+                info["install_date"] = p.get_install_date()
+                info["installed_size"] = p.get_installed_size()
+                info["installed_version"] = p.get_installed_version()
+                info["launchable"] = p.get_launchable()
+                info["license"] = p.get_license()
+                info["long_description"] = p.get_long_desc()
+                info["pkg_name"] = p.get_name()
+                info["publisher"] = p.get_publisher()
+                info["repository"] = p.get_repo()
+                info["screenshots"] = p.get_screenshots()
+                info["url"] = p.get_url()
+                info["version"] = p.get_version()
+                #info["qdata"] = p.get_qdata()
+                #info["getv"] = p.getv()
+                #info["data"] = p.get_data()
+                #info["properties"] = p.get_properties()
+                #info["property"] = p.get_property()
+            finally:
+                self.loop.quit()
+
+        self.db.get_snap_async(pkg, callback)
+        self.loop.run()
+        return info
+
+    def get_flatpak_details(self, pkg):
+        info = {}
+        def callback(source_object, result):
+            try:
+                p = source_object.get_flatpak_finish(result)
+            except GLib.GError as e:
+                print("Error: ", e.message)
+            else:
+                f = dir(p)
+                for i in f:
+                    if i.startswith("get"):
+                        print(i)              
+            finally:
+                self.loop.quit()
+
+        self.db.get_flatpak_async(pkg, callback)
+        self.loop.run()
+        return info
+
 
     def get_repos(self) -> list:
         """

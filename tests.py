@@ -23,8 +23,33 @@ class TestHardwareInfo(unittest.TestCase):
         self.assertIsInstance(i, bool)
         print(f"test virtual machine done!")
 
+    # def test_printers(self):
+        #i = Hardware.Info()
+        #s = i.get_printers()
+        # print(s)
+
 
 class TestPamac(unittest.TestCase):
+    def test_pkg_details(self):
+        i = PackageManager.Pamac()
+        p = i.get_pkg_details("gimp")
+        self.assertIsInstance(p, dict)
+        print(f"test pkg details done!")
+
+    def test_snap_details(self):
+        i = PackageManager.Pamac()
+        pkg = "gimp"
+        p = i.get_snap_details(pkg)
+        self.assertEqual(p["pkg_name"], pkg)
+        print(f"test snap details done!")
+
+    def test_flatpak_details(self):
+        i = PackageManager.Pamac()
+        pkg = "gimp"
+        p = i.get_flatpak_details(pkg)
+        #self.assertEqual(p["pkg_name"], pkg)
+        print(f"test flatpak details done!")
+
     def test_search_pkgs(self):
         i = PackageManager.Pamac()
         p = i.search_pkgs("gimp")
@@ -74,12 +99,6 @@ class TestPamac(unittest.TestCase):
         self.assertIsInstance(i.get_app_name("libpamac"), str)
         print(f"test get packages done!")
 
-    def test_package_icon(self):
-        i = PackageManager.Pamac()
-        self.assertIsInstance(i.get_app_icon("gimp"), str)
-        self.assertIsNone(i.get_app_icon("libpamac"))
-        print(f"test get packages done!")
-
     def test_add_packages(self):
         pkgs = ["gimp", "inkscape"]
         i = PackageManager.Pamac()
@@ -106,6 +125,6 @@ class TestPamac(unittest.TestCase):
         self.assertListEqual([not_installed_pkg], s)
         print(f"test sanitize packages done!")
 
-        
+
 if __name__ == '__main__':
     unittest.main()
