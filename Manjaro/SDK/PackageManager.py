@@ -44,8 +44,9 @@ class Pamac():
             "emit-warning", self.on_emit_warning, self._packages)
         self.loop = GLib.MainLoop()
         #print(dir(self.db))
-        # for i in dir(self.transaction):
-        #  print(i)
+        #for i in dir(self.db):
+         #   if "flatpak" in i:
+          #      print(i)
 
     def search_flatpaks(self, pkg: str) -> list:
         pkgs = []
@@ -132,12 +133,6 @@ class Pamac():
         info["screenshots"] = p.get_screenshots()
         info["url"] = p.get_url()
         info["version"] = p.get_version()
-        #info["getv"] = p.getv()
-        #info["data"] = p.get_data()
-        #info["properties"] = p.get_properties()
-        #info["property"] = p.get_property()
-        #info["qdata"] = p.get_qdata()
-
         return info
 
     def get_snap_details(self, pkg):
@@ -169,11 +164,6 @@ class Pamac():
                 info["screenshots"] = p.get_screenshots()
                 info["url"] = p.get_url()
                 info["version"] = p.get_version()
-                #info["qdata"] = p.get_qdata()
-                #info["getv"] = p.getv()
-                #info["data"] = p.get_data()
-                #info["properties"] = p.get_properties()
-                #info["property"] = p.get_property()
             finally:
                 self.loop.quit()
 
@@ -189,10 +179,23 @@ class Pamac():
             except GLib.GError as e:
                 print("Error: ", e.message)
             else:
-                f = dir(p)
-                for i in f:
-                    if i.startswith("get"):
-                        print(i)              
+                info["app_id"] = p.get_app_id()
+                info["app_name"] = p.get_app_name()
+                info["decription"] = p.get_desc()
+                info["download_size"] = p.get_download_size()
+                info["icon"] = p.get_icon()
+                info["id"] = p.get_id()
+                info["install_date"] = p.get_install_date()
+                info["installed_size"] = p.get_installed_size()
+                info["installed_version"] = p.get_installed_version()
+                info["launchable"] = p.get_launchable()
+                info["license"] = p.get_license()
+                info["long_description"] = p.get_long_desc()
+                info["pkg_name"] = p.get_name()
+                info["repository"] = p.get_repo()
+                info["screenshots"] = p.get_screenshots()
+                info["url"] = p.get_url()
+                info["version"] = p.get_version()
             finally:
                 self.loop.quit()
 
