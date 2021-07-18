@@ -1,13 +1,13 @@
 import subprocess
-from gi.repository import Ldm
+import pyudev
 
 
 class Info():
 
     def __init__(self):
-        self.hw_manager = Ldm.Manager()
-        self.printers = self.hw_manager.get_devices(
-            Ldm.DeviceType.USB | Ldm.DeviceType.PRINTER)
+        #TODO hardware detection using udev
+        self.context = pyudev.Context()
+
 
     def is_virtual_machine(self):
         detect_virtual_machine = subprocess.Popen(
@@ -19,15 +19,3 @@ class Info():
             return False
         else:
             return True
-
-    def get_printers(self):
-        return self.printers
-
-    def get_printer_name(self, dev_nunber=0):
-        return printers[device].get_name()
-
-    def get_providers(self, device=self.printers, dev_nunber=0):
-        return hw_manager.get_providers(device[dev_nunber])
-
-    def get_device_driver(self, device=self.printers, provider_nunber=0):
-        self.get_providers[provider_nunber].get_package()
