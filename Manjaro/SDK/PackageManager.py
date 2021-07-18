@@ -1,8 +1,8 @@
 import gi
 try:
-  gi.require_version('Pamac', '11')
+    gi.require_version('Pamac', '11')
 except Exception as e:
-  print("WARNING: installed Libpamac version does not match SDK")
+    print("WARNING: installed Libpamac version does not match SDK")
 from gi.repository import GLib, Pamac as pamac
 
 
@@ -14,16 +14,16 @@ class Pamac():
         "enable_flatpak": True
     }):
         self._packages = {
-          "install": {
-            "packages": [],
-            "snaps:": [],
-            "flatpaks": []
-          },
-          "remove": {
-              "packages": [],
-              "snaps": [],
-              "flatpaks": []
-          }
+            "install": {
+                "packages": [],
+                "snaps:": [],
+                "flatpaks": []
+            },
+            "remove": {
+                "packages": [],
+                "snaps": [],
+                "flatpaks": []
+            }
         }
         config = pamac.Config(conf_path=options["config_path"])
         config.set_enable_aur(options["enable_aur"])
@@ -43,13 +43,14 @@ class Pamac():
         self.transaction.connect(
             "emit-warning", self.on_emit_warning, self._packages)
         self.loop = GLib.MainLoop()
-        #print(dir(self.db))
-        #for i in dir(self.db):
-         #   if "flatpak" in i:
-          #      print(i)
+        # print(dir(self.db))
+        # for i in dir(self.db):
+        #   if "flatpak" in i:
+        #      print(i)
 
     def search_flatpaks(self, pkg: str) -> list:
         pkgs = []
+
         def callback(source_object, result):
             try:
                 flatpaks = source_object.search_flatpaks_finish(result)
@@ -67,6 +68,7 @@ class Pamac():
 
     def search_snaps(self, pkg: str) -> list:
         pkgs = []
+
         def callback(source_object, result):
             try:
                 snaps = source_object.search_snaps_finish(result)
@@ -113,7 +115,7 @@ class Pamac():
         info["groups"] = p.get_groups()
         info["ha_signature"] = p.get_has_signature()
         info["icon"] = p.get_icon()
-        info["id"] = p.get_id()
+        info["pkg_id"] = p.get_id()
         info["install_date"] = p.get_install_date()
         info["installed_size"] = p.get_installed_size()
         info["installed_version"] = p.get_installed_version()
@@ -121,7 +123,7 @@ class Pamac():
         info["license"] = p.get_license()
         info["long_description"] = p.get_long_desc()
         info["makedepends"] = p.get_makedepends()
-        info["pkg_name"] = p.get_name()
+        info["name"] = p.get_name()
         info["optdepends"] = p.get_optdepends()
         info["optionalfor"] = p.get_optionalfor()
         info["packager"] = p.get_packager()
@@ -137,6 +139,7 @@ class Pamac():
 
     def get_snap_details(self, pkg):
         info = {}
+
         def callback(source_object, result):
             try:
                 p = source_object.get_snap_finish(result)
@@ -158,7 +161,7 @@ class Pamac():
                 info["launchable"] = p.get_launchable()
                 info["license"] = p.get_license()
                 info["long_description"] = p.get_long_desc()
-                info["pkg_name"] = p.get_name()
+                info["name"] = p.get_name()
                 info["publisher"] = p.get_publisher()
                 info["repository"] = p.get_repo()
                 info["screenshots"] = p.get_screenshots()
@@ -173,6 +176,7 @@ class Pamac():
 
     def get_flatpak_details(self, pkg):
         info = {}
+
         def callback(source_object, result):
             try:
                 p = source_object.get_flatpak_finish(result)
@@ -180,7 +184,7 @@ class Pamac():
                 print("Error: ", e.message)
             else:
                 info["app_id"] = p.get_app_id()
-                info["app_name"] = p.get_app_name()
+                info["title"] = p.get_app_name()
                 info["decription"] = p.get_desc()
                 info["download_size"] = p.get_download_size()
                 info["icon"] = p.get_icon()
@@ -191,7 +195,7 @@ class Pamac():
                 info["launchable"] = p.get_launchable()
                 info["license"] = p.get_license()
                 info["long_description"] = p.get_long_desc()
-                info["pkg_name"] = p.get_name()
+                info["name"] = p.get_name()
                 info["repository"] = p.get_repo()
                 info["screenshots"] = p.get_screenshots()
                 info["url"] = p.get_url()
@@ -202,7 +206,6 @@ class Pamac():
         self.db.get_flatpak_async(pkg, callback)
         self.loop.run()
         return info
-
 
     def get_repos(self) -> list:
         """
@@ -216,23 +219,21 @@ class Pamac():
         """
         return self.db.get_categories_names()
 
-    def get_all_pkgs(self) -> list:
+    def get_all_pkgs(self, db=[]) -> list:
         """
         return all available native packages
         """
-        pkgs = []
         for repo in self.get_repos():
             repository = self.db.get_repo_pkgs(repo)
             for pkg in repository:
-                pkgs.append(pkg)
+                db.append(pkg)
 
-        return pkgs
+        return tuple(db)
 
-    def get_all_snaps(self) -> list:
+    def get_all_snaps(self, db=[]) -> list:
         """
         return all available snaps
         """
-        pkgs = []
         def callback(source_object, result):
             try:
                 snaps = source_object.get_category_snaps_finish(result)
@@ -240,7 +241,7 @@ class Pamac():
                 print("Error: ", e.message)
             else:
                 for pkg in snaps:
-                    pkgs.append(pkg)
+                    db.append(pkg)
             finally:
                 self.loop.quit()
 
@@ -248,13 +249,12 @@ class Pamac():
             self.db.get_category_snaps_async(cat, callback)
             self.loop.run()
 
-        return pkgs
+        return tuple(db)
 
-    def get_all_flatpaks(self) -> list:
+    def get_all_flatpaks(self, db=[]) -> list:
         """
         return all available flatpaks
         """
-        pkgs = []
         def on_category_flatpaks_ready_callback(source_object, result):
             try:
                 flatpaks = source_object.get_category_flatpaks_finish(result)
@@ -262,7 +262,7 @@ class Pamac():
                 print("Error: ", e.message)
             else:
                 for pkg in flatpaks:
-                    pkgs.append(pkg)
+                    db.append(pkg)
             finally:
                 self.loop.quit()
 
@@ -271,7 +271,7 @@ class Pamac():
                 cat, on_category_flatpaks_ready_callback)
             self.loop.run()
 
-        return pkgs
+        return tuple(db)
 
     def add_pkgs_to_install(self, pkgs: list, pkg_format="packages"):
         """
@@ -282,7 +282,7 @@ class Pamac():
             self._packages["install"][pkg_format].append(pkg)
         for pkg in pkgs:
             add(pkg)
-        
+
     def remove_pkgs_from_install(self, pkgs: list, pkg_format="packages"):
         """
         remove packages from installation list
@@ -314,6 +314,7 @@ class Pamac():
         or are not installed
         """
         pkgs = []
+
         def check_pkg(pkg):
             error = f"package not existent: {pkg}"
             try:
@@ -376,7 +377,6 @@ class Pamac():
         to be reimplemented if we need to do something affter transaction finishes
         """
         print("Transaction successful")
-
     def on_transaction_finished_callback(self, source_object, result, user_data):
         try:
             success = source_object.run_finish(result)
@@ -397,19 +397,19 @@ class Pamac():
         install_flatpaks = self._packages["install"]["flatpaks"]
 
         if install_pkgs:
-          self.transaction.add_pkgs_to_upgrade(get_installed_pkgs())
-          for pkg in install_pkgs:
-            self.transaction.add_pkg_to_install(pkg)
+            self.transaction.add_pkgs_to_upgrade(get_installed_pkgs())
+            for pkg in install_pkgs:
+                self.transaction.add_pkg_to_install(pkg)
 
         if install_snaps:
-          self.transaction.add_snaps_to_upgrade(get_installed_snaps())
-          for pkg in install_snaps:
-            self.transaction.add_snaps_to_install(pkg)
+            self.transaction.add_snaps_to_upgrade(get_installed_snaps())
+            for pkg in install_snaps:
+                self.transaction.add_snaps_to_install(pkg)
 
         if install_flatpaks:
-          self.transaction.add_flatpaks_to_upgrade(get_installed_flatpaks())
-          for pkg in install_flatpaks:
-            self.transaction.add_flatpaks_to_install(pkg)
+            self.transaction.add_flatpaks_to_upgrade(get_installed_flatpaks())
+            for pkg in install_flatpaks:
+                self.transaction.add_flatpaks_to_install(pkg)
 
         self.transaction.run_async(self.on_transaction_finished_callback, None)
         self.loop.run()
