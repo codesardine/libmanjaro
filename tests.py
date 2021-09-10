@@ -1,6 +1,23 @@
 import unittest
-from Manjaro.SDK import PackageManager, Branches, Osinfo, Hardware
+try:
+    from Manjaro.SDK import PackageManager
+except Exception as e:
+    print(e)
 
+try:
+    from Manjaro.SDK import Branches
+except Exception as e:
+    print(e)
+
+try:
+    from Manjaro.SDK import Os
+except Exception as e:
+    print(e)
+
+try:
+    from Manjaro.SDK import Hardware
+except Exception as e:
+    print(e)
 
 class TestBranches(unittest.TestCase):
 
@@ -12,7 +29,7 @@ class TestBranches(unittest.TestCase):
 
 class TestOsInfo(unittest.TestCase):
     def test_env_variables(self):
-        i = Osinfo.Info.get_inv_variables()
+        i = Os.Info().get_inv_variables()
         self.assertIsInstance(i, dict)
         print(f"test env variables done!")
 
@@ -22,11 +39,6 @@ class TestHardwareInfo(unittest.TestCase):
         i = Hardware.Info().is_virtual_machine()
         self.assertIsInstance(i, bool)
         print(f"test virtual machine done!")
-
-    # def test_printers(self):
-        #i = Hardware.Info()
-        #s = i.get_printers()
-        # print(s)
 
 
 class TestPamac(unittest.TestCase):
@@ -40,14 +52,15 @@ class TestPamac(unittest.TestCase):
         i = PackageManager.Pamac()
         pkg = "gimp"
         p = i.get_snap_details(pkg)
-        self.assertEqual(p["pkg_name"], pkg)
+        self.assertEqual(p["name"], pkg)
         print(f"test snap details done!")
 
     def test_flatpak_details(self):
         i = PackageManager.Pamac()
-        pkg = "gimp"
-        p = i.get_flatpak_details(pkg)
-        #self.assertEqual(p["pkg_name"], pkg)
+        pkg = "org.gimp.GIMP"
+        _id = "flathub/app/org.gimp.GIMP/x86_64/stable"
+        p = i.get_flatpak_details(_id)
+        self.assertEqual(p["name"], pkg)
         print(f"test flatpak details done!")
 
     def test_search_pkgs(self):
@@ -85,11 +98,11 @@ class TestPamac(unittest.TestCase):
         packages = i.get_all_pkgs()
         snaps = i.get_all_snaps()
         flatpaks = i.get_all_flatpaks()
-        self.assertIsInstance(packages, list)
+        self.assertIsInstance(packages, tuple)
         self.assertIsInstance(packages[0], object)
-        self.assertIsInstance(snaps, list)
+        self.assertIsInstance(snaps, tuple)
         self.assertIsInstance(snaps[0], object)
-        self.assertIsInstance(flatpaks, list)
+        self.assertIsInstance(flatpaks, tuple)
         self.assertIsInstance(flatpaks[0], object)
         print(f"test get packages done!")
 
