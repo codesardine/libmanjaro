@@ -15,9 +15,8 @@ class Info():
             dict[split[0]] = str(split[1])          
         return dict
 
-        
     def get_lsb_version(self):
-        lsb = Popen(["lsb_release"], shell=shell)
+        lsb = subprocess.Popen(["lsb_release"], shell=True)
         return lsb.replace("LSB Version:", "").trim()
 
     

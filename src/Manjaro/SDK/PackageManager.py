@@ -4,6 +4,7 @@ try:
 except Exception as e:
     print("WARNING: installed Libpamac version does not match SDK")
 from gi.repository import GLib, Pamac as pamac
+from Manjaro.SDK import Utils
 
 
 class Pamac():
@@ -106,7 +107,7 @@ class Pamac():
         info["app_id"] = p.get_app_id()
         info["title"] = p.get_app_name()
         info["backups"] = p.get_backups()
-        info["build_date"] = p.get_build_date()
+        info["build_date"] = Utils.glib_date_to_string(p.get_build_date())
         info["check_depends"] = p.get_checkdepends()
         info["conflits"] = p.get_conflicts()
         info["depends"] = p.get_depends()
@@ -116,7 +117,7 @@ class Pamac():
         info["ha_signature"] = p.get_has_signature()
         info["icon"] = p.get_icon()
         info["pkg_id"] = p.get_id()
-        info["install_date"] = p.get_install_date()
+        info["install_date"] = Utils.glib_date_to_string(p.get_install_date())
         info["installed_size"] = p.get_installed_size()
         info["installed_version"] = p.get_installed_version()
         info["launchable"] = p.get_launchable()
