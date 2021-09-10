@@ -1,12 +1,13 @@
 import subprocess
-import pyudev
+#import pyudev
 
 
 class Info():
 
     def __init__(self):
         #TODO hardware detection using udev
-        self.context = pyudev.Context()
+        #self.context = pyudev.Context()
+        pass
 
 
     def is_virtual_machine(self):
