@@ -129,7 +129,9 @@ class Pamac():
         info["optionalfor"] = p.get_optionalfor()
         info["packager"] = p.get_packager()
         info["provides"] = p.get_provides()
-        info["reason"] = p.get_reason()
+        info["reason"] = None
+        if p.get_reason():
+            info["reason"] = p.get_reason()
         info["replaces"] = p.get_replaces()
         info["repository"] = p.get_repo()
         info["required_by"] = p.get_requiredby()
