@@ -1,9 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
-    name='Manjaro',
+    name='manjaro-sdk',
     version='0.1',
-    packages=[],
+    packages=["Manjaro.SDK"],
     package_dir={"": "src"},
     url='https://github.com/Manjaro-WebDad/libmanjaro.git',
     license='GPL',
