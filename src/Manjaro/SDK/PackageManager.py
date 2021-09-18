@@ -178,36 +178,24 @@ class Pamac():
         return info
 
     def get_flatpak_details(self, pkg):
-        info = {}
-
-        def callback(source_object, result):
-            try:
-                p = source_object.get_flatpak_finish(result)
-            except GLib.GError as e:
-                print("Error: ", e.message)
-            else:
-                info["app_id"] = p.get_app_id()
-                info["title"] = p.get_app_name()
-                info["decription"] = p.get_desc()
-                info["download_size"] = p.get_download_size()
-                info["icon"] = p.get_icon()
-                info["id"] = p.get_id()
-                info["install_date"] = Utils.glib_date_to_string(p.get_install_date())
-                info["installed_size"] = p.get_installed_size()
-                info["installed_version"] = p.get_installed_version()
-                info["launchable"] = p.get_launchable()
-                info["license"] = p.get_license()
-                info["long_description"] = p.get_long_desc()
-                info["name"] = p.get_name()
-                info["repository"] = p.get_repo()
-                info["screenshots"] = p.get_screenshots()
-                info["url"] = p.get_url()
-                info["version"] = p.get_version()
-            finally:
-                self.loop.quit()
-
-        self.db.get_flatpak_async(pkg, callback)
-        self.loop.run()
+        info = {}        
+        info["app_id"] = pkg.get_app_id()
+        info["title"] = pkg.get_app_name()
+        info["description"] = pkg.get_desc()
+        info["download_size"] = pkg.get_download_size()
+        info["icon"] = pkg.get_icon()
+        info["id"] = pkg.get_id()
+        info["install_date"] = Utils.glib_date_to_string(pkg.get_install_date())
+        info["installed_size"] = pkg.get_installed_size()
+        info["installed_version"] = pkg.get_installed_version()
+        info["launchable"] = pkg.get_launchable()
+        info["license"] = pkg.get_license()
+        info["long_description"] = pkg.get_long_desc()
+        info["name"] = pkg.get_name()
+        info["repository"] = pkg.get_repo()
+        info["screenshots"] = pkg.get_screenshots()
+        info["url"] = pkg.get_url()
+        info["version"] = pkg.get_version()            
         return info
 
     def get_repos(self) -> list:
