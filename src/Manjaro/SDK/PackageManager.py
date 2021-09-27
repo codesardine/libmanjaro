@@ -17,7 +17,7 @@ class Pamac():
         self._packages = {
             "install": {
                 "packages": [],
-                "snaps:": [],
+                "snaps": [],
                 "flatpaks": []
             },
             "remove": {
