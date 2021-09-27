@@ -15,7 +15,6 @@ class Branch():
 
 
     def set_branch_mirrors(self, branch):
-        if self.get_branch() != branch:
-            cmd = ["pkexec", "pacman-mirrors", "--fasttrack",
-                    "--api", "--set-branch", f"{branch}"]
-            Popen(cmd)
+        cmd = ["pacman-mirrors", "--fasttrack",
+               "--api", "--set-branch", f"{branch}"]
+        Popen(cmd)
