@@ -368,6 +368,7 @@ class Pamac():
         to be reimplemented if we need to do something affter transaction finishes
         """
         print("Transaction successful")
+        
     def on_transaction_finished_callback(self, source_object, result, user_data):
         try:
             success = source_object.run_finish(result)
@@ -386,21 +387,36 @@ class Pamac():
         install_pkgs = self._packages["install"]["packages"]
         install_snaps = self._packages["install"]["snaps"]
         install_flatpaks = self._packages["install"]["flatpaks"]
+        remove_pkgs = self._packages["remove"]["packages"]
+        remove_snaps = self._packages["remove"]["snaps"]
+        remove_flatpaks = self._packages["remove"]["flatpaks"]
 
         if install_pkgs:
-            self.transaction.add_pkgs_to_upgrade(get_installed_pkgs())
+            self.transaction.add_pkgs_to_upgrade(self.get_installed_pkgs())
             for pkg in install_pkgs:
                 self.transaction.add_pkg_to_install(pkg)
 
         if install_snaps:
-            self.transaction.add_snaps_to_upgrade(get_installed_snaps())
+            self.transaction.add_snaps_to_upgrade(self.get_installed_snaps())
             for pkg in install_snaps:
                 self.transaction.add_snaps_to_install(pkg)
 
         if install_flatpaks:
-            self.transaction.add_flatpaks_to_upgrade(get_installed_flatpaks())
+            self.transaction.add_flatpaks_to_upgrade(self.get_installed_flatpaks())
             for pkg in install_flatpaks:
                 self.transaction.add_flatpaks_to_install(pkg)
+
+        if remove_pkgs:
+            for pkg in remove_pkgs:
+                self.transaction.add_pkg_to_remove(pkg)
+
+        if remove_snaps:
+            for pkg in remove_snaps:
+                self.transaction.add_snaps_to_remove(pkg)
+
+        if remove_flatpaks:
+            for pkg in remove_flatpaks:
+                self.transaction.add_flatpaks_to_remove(pkg)
 
         self.transaction.run_async(self.on_transaction_finished_callback, None)
         self.loop.run()
