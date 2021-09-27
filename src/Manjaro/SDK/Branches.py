@@ -18,4 +18,4 @@ class Branch():
         if self.get_branch() != branch:
             cmd = ["pkexec", "pacman-mirrors", "--fasttrack",
                     "--api", "--set-branch", f"{branch}"]
-            Popen(cmd, shell=shell)
+            Popen(cmd)
