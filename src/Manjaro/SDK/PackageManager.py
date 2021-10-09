@@ -32,17 +32,18 @@ class Pamac():
         config.set_enable_flatpak(options["enable_flatpak"])
         self.db = pamac.Database(config=config)
         self.db.enable_appstream()
+        self.data = None
         self.transaction = pamac.Transaction(database=self.db)
         self.transaction.connect(
-            "emit-action", self.on_emit_action, self._packages)
+            "emit-action", self.on_emit_action, self.data)
         self.transaction.connect(
-            "emit-action-progress", self._on_emit_action_progress, self._packages)
+            "emit-action-progress", self._on_emit_action_progress, self.data)
         self.transaction.connect("emit-hook-progress",
-                                 self._on_emit_hook_progress, self._packages)
+                                 self._on_emit_hook_progress, self.data)
         self.transaction.connect(
-            "emit-error", self.on_emit_error, self._packages)
+            "emit-error", self.on_emit_error, self.data)
         self.transaction.connect(
-            "emit-warning", self.on_emit_warning, self._packages)
+            "emit-warning", self.on_emit_warning, self.data)
         self.loop = GLib.MainLoop()
         # print(dir(self.db))
         # for i in dir(self.db):
@@ -271,6 +272,7 @@ class Pamac():
         """
         def add(pkg):
             self._packages["install"][pkg_format].append(pkg)
+            
         for pkg in pkgs:
             add(pkg)
 
@@ -293,8 +295,7 @@ class Pamac():
         :param pkg_format: packages/snaps/flatpaks
         """
         def remove(pkg):
-            if self.db.is_installed_pkg(pkg):
-                self._packages["remove"][pkg_format].append(pkg)
+            self._packages["remove"][pkg_format].append(pkg)
 
         for pkg in pkgs:
             remove(pkg)
@@ -332,40 +333,22 @@ class Pamac():
 
     def on_emit_action(self, transaction, action, data):
         print(action)
-        return action
 
     def _on_emit_action_progress(self, transaction, action, status, progress, data):
         print(f"{action} {status} {progress}")
-        return progress
 
     def _on_emit_hook_progress(self, transaction, action, details, status, progress, data):
         print(f"{action} {details} {status}")
-        return progress
 
     def on_emit_warning(self, transaction, message, data):
         print(message)
-        return message
 
-    def on_emit_error(self, transaction, message, details, details_length, data):
-        if details_length > 0:
-            print(f"{message}:")
-        for detail in details:
-            print(detail)
-        else:
-            print(message)
-
-    def get_progress(self) -> int:
-        """
-        return package manager progress
-        """
-        if self._on_emit_hook_progress():
-            return self._on_emit_hook_progress()
-        elif self._on_emit_action_progress():
-            return self._on_emit_action_progress()
+    def on_emit_error(self, *args):
+        print(args[2][0])
 
     def on_transaction_finish(self):
         """
-        to be reimplemented if we need to do something affter transaction finishes
+        to be reimplemented if we need to do something after transaction finishes
         """
         print("Transaction successful")
         
@@ -377,8 +360,6 @@ class Pamac():
         else:
             if success:
                 self.on_transaction_finish()
-            else:
-                print("Ops something went wrong.")
         finally:
             self.loop.quit()
             self.transaction.quit_daemon()
@@ -397,14 +378,12 @@ class Pamac():
                 self.transaction.add_pkg_to_install(pkg)
 
         if install_snaps:
-            self.transaction.add_snaps_to_upgrade(self.get_installed_snaps())
             for pkg in install_snaps:
-                self.transaction.add_snaps_to_install(pkg)
+                self.transaction.add_snap_to_install(pkg)
 
         if install_flatpaks:
-            self.transaction.add_flatpaks_to_upgrade(self.get_installed_flatpaks())
             for pkg in install_flatpaks:
-                self.transaction.add_flatpaks_to_install(pkg)
+                self.transaction.add_flatpak_to_install(pkg)
 
         if remove_pkgs:
             for pkg in remove_pkgs:
@@ -412,11 +391,11 @@ class Pamac():
 
         if remove_snaps:
             for pkg in remove_snaps:
-                self.transaction.add_snaps_to_remove(pkg)
+                self.transaction.add_snap_to_remove(pkg)
 
         if remove_flatpaks:
             for pkg in remove_flatpaks:
-                self.transaction.add_flatpaks_to_remove(pkg)
+                self.transaction.add_flatpak_to_remove(pkg)
 
         self.transaction.run_async(self.on_transaction_finished_callback, None)
         self.loop.run()
