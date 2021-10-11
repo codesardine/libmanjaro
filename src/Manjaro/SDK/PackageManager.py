@@ -9,10 +9,7 @@ from Manjaro.SDK import Utils
 
 class Pamac():
     def __init__(self, options={
-        "config_path": "/etc/pamac.conf",
-        "enable_aur": False,
-        "enable_snap": True,
-        "enable_flatpak": True
+        "config_path": "/etc/pamac.conf"
     }):
         self._packages = {
             "install": {
@@ -26,11 +23,8 @@ class Pamac():
                 "flatpaks": []
             }
         }
-        config = pamac.Config(conf_path=options["config_path"])
-        config.set_enable_aur(options["enable_aur"])
-        config.set_enable_snap(options["enable_snap"])
-        config.set_enable_flatpak(options["enable_flatpak"])
-        self.db = pamac.Database(config=config)
+        self.config = pamac.Config(conf_path=options["config_path"])
+        self.db = pamac.Database(config=self.config)
         self.db.enable_appstream()
         self.data = None
         self.transaction = pamac.Transaction(database=self.db)
@@ -45,10 +39,6 @@ class Pamac():
         self.transaction.connect(
             "emit-warning", self.on_emit_warning, self.data)
         self.loop = GLib.MainLoop()
-        # print(dir(self.db))
-        # for i in dir(self.db):
-        #   if "flatpak" in i:
-        #      print(i)
 
     def search_flatpaks(self, pkg: str) -> list:
         pkgs = []
@@ -64,6 +54,7 @@ class Pamac():
             finally:
                 self.loop.quit()
 
+        self.config.set_enable_flatpak(True)
         self.db.search_flatpaks_async(pkg, callback)
         self.loop.run()
         return pkgs
@@ -82,6 +73,7 @@ class Pamac():
             finally:
                 self.loop.quit()
 
+        self.config.set_enable_snap(True)
         self.db.search_snaps_async(pkg, callback)
         self.loop.run()
         return pkgs
@@ -378,10 +370,12 @@ class Pamac():
                 self.transaction.add_pkg_to_install(pkg)
 
         if install_snaps:
+            self.config.set_enable_snap(True)
             for pkg in install_snaps:
                 self.transaction.add_snap_to_install(pkg)
 
         if install_flatpaks:
+            self.config.set_enable_flatpak(True)
             for pkg in install_flatpaks:
                 self.transaction.add_flatpak_to_install(pkg)
 
@@ -390,10 +384,12 @@ class Pamac():
                 self.transaction.add_pkg_to_remove(pkg)
 
         if remove_snaps:
+            self.config.set_enable_snap(True)
             for pkg in remove_snaps:
                 self.transaction.add_snap_to_remove(pkg)
 
         if remove_flatpaks:
+            self.config.set_enable_flatpak(True)
             for pkg in remove_flatpaks:
                 self.transaction.add_flatpak_to_remove(pkg)
 
