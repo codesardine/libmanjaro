@@ -9,7 +9,8 @@ from Manjaro.SDK import Utils
 
 class Pamac():
     def __init__(self, options={
-        "config_path": "/etc/pamac.conf"
+        "config_path": "/etc/pamac.conf",
+        "dry_run": False
     }):
         self._packages = {
             "install": {
@@ -24,6 +25,7 @@ class Pamac():
             }
         }
         self.config = pamac.Config(conf_path=options["config_path"])
+        self.options = options
         self.db = pamac.Database(config=self.config)
         self.db.enable_appstream()
         self.data = None
@@ -358,6 +360,7 @@ class Pamac():
             self.on_transaction_finish()
 
     def _run_transaction(self):
+        self.transaction.set_dry_run(self.options["dry_run"])
         install_pkgs = self._packages["install"]["packages"]
         install_snaps = self._packages["install"]["snaps"]
         install_flatpaks = self._packages["install"]["flatpaks"]
