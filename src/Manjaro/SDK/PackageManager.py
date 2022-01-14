@@ -351,10 +351,11 @@ class Pamac():
             print("Error: ", e.message)
         else:
             if success:
-                self.on_transaction_finish()
+                pass
         finally:
             self.loop.quit()
             self.transaction.quit_daemon()
+            self.on_transaction_finish()
 
     def _run_transaction(self):
         install_pkgs = self._packages["install"]["packages"]
