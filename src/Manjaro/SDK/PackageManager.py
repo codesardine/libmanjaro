@@ -10,7 +10,8 @@ from Manjaro.SDK import Utils
 class Pamac():
     def __init__(self, options={
         "config_path": "/etc/pamac.conf",
-        "dry_run": False
+        "dry_run": False,
+        "update": True
     }):
         self._packages = {
             "install": {
@@ -369,7 +370,8 @@ class Pamac():
         remove_flatpaks = self._packages["remove"]["flatpaks"]
 
         if install_pkgs:
-            self.transaction.add_pkgs_to_upgrade(self.get_installed_pkgs())
+            if self.options["update"]:
+                self.transaction.add_pkgs_to_upgrade(self.get_installed_pkgs())
             for pkg in install_pkgs:
                 self.transaction.add_pkg_to_install(pkg)
 
