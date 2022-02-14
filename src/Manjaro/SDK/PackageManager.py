@@ -11,7 +11,7 @@ class Pamac():
     def __init__(self, options={
         "config_path": "/etc/pamac.conf",
         "dry_run": False,
-        "update": True
+        "upgrade": True
     }):
         self._packages = {
             "install": {
@@ -30,6 +30,9 @@ class Pamac():
         self.db = pamac.Database(config=self.config)
         self.db.enable_appstream()
         self.data = None
+        self.status = 0
+        self.bar = None
+        self.action = None
         self.transaction = pamac.Transaction(database=self.db)
         self.transaction.connect(
             "emit-action", self.on_emit_action, self.data)
@@ -100,6 +103,7 @@ class Pamac():
     def get_pkg_details(self, pkg):
         p = self.db.get_pkg(pkg)
         info = {}
+        info["format"] = "native"
         info["app_id"] = p.get_app_id()
         info["title"] = p.get_app_name()
         info["backups"] = p.get_backups()
@@ -110,7 +114,7 @@ class Pamac():
         info["description"] = p.get_desc()
         info["download_size"] = p.get_download_size()
         info["groups"] = p.get_groups()
-        info["ha_signature"] = p.get_has_signature()
+        info["validate"] = p.validate()
         info["icon"] = p.get_icon()
         info["pkg_id"] = p.get_id()
         info["install_date"] = Utils.glib_date_to_string(p.get_install_date())
@@ -145,6 +149,7 @@ class Pamac():
             except GLib.GError as e:
                 print("Error: ", e.message)
             else:
+                info["format"] = "snap"
                 info["app_id"] = p.get_app_id()
                 info["title"] = p.get_app_name()
                 info["channel"] = p.get_channel()
@@ -174,7 +179,8 @@ class Pamac():
         return info
 
     def get_flatpak_details(self, pkg):
-        info = {}        
+        info = {}      
+        info["format"] = "flatpak"  
         info["app_id"] = pkg.get_app_id()
         info["title"] = pkg.get_app_name()
         info["description"] = pkg.get_desc()
@@ -326,26 +332,36 @@ class Pamac():
             pkgs.append(pkg.get_name())
         return pkgs
 
+
+    def on_msg_emit(self, action=None, progress=None, status=None, details=[], message=None):
+        """
+        to be reimplemented if we need to do something after transaction finishes
+        """
+        for msg in (action, progress, status, message, details):
+            if msg:
+                pass#print(msg)
+
+
     def on_emit_action(self, transaction, action, data):
-        print(action)
+        self.on_msg_emit(action=action)
 
     def _on_emit_action_progress(self, transaction, action, status, progress, data):
-        print(f"{action} {status} {progress}")
+       self.on_msg_emit(action=action, status=status, progress=progress)
 
     def _on_emit_hook_progress(self, transaction, action, details, status, progress, data):
-        print(f"{action} {details} {status}")
+        self.on_msg_emit(action=action, details=details, status=status)
 
     def on_emit_warning(self, transaction, message, data):
-        print(message)
+        self.on_msg_emit(message=message)
 
-    def on_emit_error(self, *args):
-        print(args[2][0])
-
+    def on_emit_error(self, transaction, message, details, data):
+	    self.on_msg_emit(message=message, details=details)
+        
+    
     def on_transaction_finish(self):
         """
         to be reimplemented if we need to do something after transaction finishes
         """
-        print("Transaction successful")
         
     def on_transaction_finished_callback(self, source_object, result, user_data):
         try:
@@ -370,18 +386,23 @@ class Pamac():
         remove_flatpaks = self._packages["remove"]["flatpaks"]
 
         if install_pkgs:
-            if self.options["update"]:
+            if self.options["upgrade"]:
                 self.transaction.add_pkgs_to_upgrade(self.get_installed_pkgs())
             for pkg in install_pkgs:
                 self.transaction.add_pkg_to_install(pkg)
 
         if install_snaps:
             self.config.set_enable_snap(True)
+            #TODO get list of installed snap
             for pkg in install_snaps:
                 self.transaction.add_snap_to_install(pkg)
 
         if install_flatpaks:
             self.config.set_enable_flatpak(True)
+            if self.options["upgrade"]:
+                installed = self.get_all_flatpaks()
+                for pkg in installed:
+                    pass #TODO get list of installed flatpack self.transaction.add_flatpak_to_upgrade()
             for pkg in install_flatpaks:
                 self.transaction.add_flatpak_to_install(pkg)
 
