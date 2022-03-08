@@ -6,6 +6,7 @@ class Package():
         self.pm = pm_instance
         self.install = []
         self.remove = []
+        self.get_details("gimp")
 
 
     def search(self, pkg):
@@ -41,7 +42,8 @@ class Package():
     def get_details(self, pkg):
         p = self.pm.db.get_pkg(pkg)
         info = {}
-        info["format"] = "native"
+        info["format"] = "package"
+        info["files"] = p.get_files()
         info["app_id"] = p.get_app_id()
         info["title"] = p.get_app_name()
         info["backups"] = p.get_backups()
@@ -52,7 +54,6 @@ class Package():
         info["description"] = p.get_desc()
         info["download_size"] = p.get_download_size()
         info["groups"] = p.get_groups()
-        info["validate"] = p.validate()
         info["icon"] = p.get_icon()
         info["pkg_id"] = p.get_id()
         info["install_date"] = Utils.glib_date_to_string(p.get_install_date())
