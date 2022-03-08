@@ -7,6 +7,7 @@ from gi.repository import GLib, Pamac as pamac
 from Manjaro.SDK.Snaps import Snap
 from Manjaro.SDK.Flatpaks import Flatpak
 from Manjaro.SDK.Packages import Package
+from Manjaro.SDK.Appimages import Appimage
 
 
 class Pamac():
@@ -23,6 +24,7 @@ class Pamac():
         self.package = Package(self)
         self.snap = Snap(self)
         self.flatpak = Flatpak(self)
+        self.appimage = Appimage(self)
         self.transaction = pamac.Transaction(database=self.db)
         self.transaction.connect("emit-action", self.on_emit_action, self.data)
         self.transaction.connect("emit-action-progress", self._on_emit_action_progress, self.data)
@@ -112,6 +114,9 @@ class Pamac():
         elif pkg_format == "flatpaks":
             target = self.flatpak.install
 
+        elif pkg_format == "appimages":
+            target = self.appimage.install
+
         for pkg in pkgs:
             target.append(pkg)
 
@@ -129,6 +134,9 @@ class Pamac():
 
         elif pkg_format == "flatpaks":
             target = self.flatpak.remove
+
+        elif pkg_format == "appimages":
+            target = self.appimage.remove
 
         for pkg in pkgs:
             target.append(pkg)
@@ -206,6 +214,12 @@ class Pamac():
         if self.flatpak.install:
             for pkg in self.flatpak.install:
                 self.transaction.add_flatpak_to_install(pkg)
+
+        if self.appimage.install:
+            self.appimage.transaction_install()
+
+        if self.appimage.remove:
+            self.appimage.transaction_remove()
 
         if self.package.remove:
             for pkg in self.package.remove:
