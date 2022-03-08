@@ -51,7 +51,6 @@ class Appimage():
     def get_details(self, pkg):
         for app in self.db:
             if pkg == app["name"]:
-                print(app)
                 return app 
 
 
