@@ -10,6 +10,10 @@ class Snap():
         self.remove = []
 
 
+    def is_plugin_installed(self):
+        return self.pm.config.get_support_snap()
+
+
     def search(self, pkg):
         pkgs = []
         def callback(source_object, result):

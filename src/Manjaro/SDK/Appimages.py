@@ -1,6 +1,6 @@
 from urllib import request
 from Manjaro.SDK import Utils
-import json, pathlib, subprocess
+import json, pathlib, subprocess, os
 
 
 class Appimage():
@@ -12,6 +12,10 @@ class Appimage():
         self.install = []
         self.remove = []
         self.db = self._build_db()
+
+
+    def is_plugin_installed(self):
+        return os.path.exists("/usr/bin/ail-cli")
 
 
     def _get_json(self, provider):

@@ -9,6 +9,10 @@ class Flatpak():
         self.install = []
         self.remove = []
 
+
+    def is_plugin_installed(self):
+        return self.pm.config.get_support_flatpak()
+
     
     def search(self, pkg):
         pkgs = []
