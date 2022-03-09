@@ -6,8 +6,7 @@ class Package():
         self.pm = pm_instance
         self.install = []
         self.remove = []
-        self.get_details("gimp")
-
+        
 
     def search(self, pkg):
         pkgs = []
