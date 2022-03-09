@@ -21,10 +21,18 @@ class Appimage():
             return data
 
 
-    def search(self, pkg):
+    def search(self, value):
         pkgs = []
+        search_value = value.lower()
         for app in self.db:
-            if pkg in app["name"].split(".")[1]:
+            name = app["name"].split(".")[1].lower()
+            title = app["title"].lower()
+            desc = app["description"].lower()
+            if search_value in name:
+                pkgs.append(app["name"])
+            elif search_value in title:
+                pkgs.append(app["name"])
+            elif search_value in desc:
                 pkgs.append(app["name"])
         return tuple(pkgs)
 
