@@ -41,6 +41,14 @@ class Appimage():
         return tuple(pkgs)
 
 
+    def package_exists(self, pkg):
+        for app in self.db:
+            if pkg == app["name"]:
+                return True
+            else:
+                return False
+
+
     def transaction_install(self):
         for pkg in self.install:
             name = pkg.replace('.', '/')
