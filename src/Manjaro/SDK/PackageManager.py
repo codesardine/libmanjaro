@@ -14,7 +14,7 @@ class Pamac():
     def __init__(self, options={
         "config_path": "/etc/pamac.conf",
         "dry_run": False,
-        "upgrade": True
+        "upgrade": False
     }):
         self.config = pamac.Config(conf_path=options["config_path"])
         self.options = options
