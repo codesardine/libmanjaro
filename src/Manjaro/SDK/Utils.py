@@ -13,3 +13,20 @@ def strip_html(html):
         regex = re.compile('<.*?>')
         text = re.sub(regex, '', html)
         return text
+
+
+def convert_bytes_to_human(bytes):
+        if bytes >= 1073741824:
+            v = bytes / 1024/1024/1024
+            size = f"{round(v, 1) } GB"
+        elif bytes >= 1048576:
+            v = bytes / 1024/1024
+            size = f"{round(v, 1) } MB"
+        elif bytes >= 1024:
+            v = bytes / 1024
+            size = f"{round(v, 1) } KB"
+        else:
+            size = f"{round(bytes, 1) } Bytes"
+        return f"{size}"
+
+
