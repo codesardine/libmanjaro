@@ -200,10 +200,11 @@ class Pamac():
 
     def _run_transaction(self):
         self.transaction.set_dry_run(self.options["dry_run"])
+
+        if self.options["upgrade"]:
+            self.transaction.add_pkgs_to_upgrade(self.get_installed_pkgs())
                 
         if self.package.install:
-            if self.options["upgrade"]:
-                self.transaction.add_pkgs_to_upgrade(self.get_installed_pkgs())
             for pkg in self.package.install:
                 self.transaction.add_pkg_to_install(pkg)
 
