@@ -1,6 +1,9 @@
 from urllib import request
 from Manjaro.SDK import Utils
 import json, pathlib, subprocess, os
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gio, Gtk
 
 
 class Appimage():
@@ -12,7 +15,9 @@ class Appimage():
         self.install = []
         self.remove = []
         self.db = self._build_db()
-
+        i = self.get_installed()
+        for app in i:
+            print(self.get_installed_details(app))
 
     def is_plugin_installed(self):
         return os.path.exists("/usr/bin/ail-cli")
@@ -79,6 +84,45 @@ class Appimage():
         for app in self.db:
             pkgs.append(app["name"])
         return tuple(pkgs)
+
+
+    def _is_appimage(self, app):
+        local = ".local"
+        exec = app.get_executable()
+        if local in app.get_filename() and exec.endswith("AppImage"):
+            return True
+        else:
+            return False
+
+    
+    def get_installed_details(self, app):
+        info = {}
+        files = info["files"] = {}
+        icon = app.get_icon()
+        icon_theme = Gtk.IconTheme.get_default()      
+        for icon_name in icon.props.names:
+            lookup = icon_theme.lookup_icon(icon_name, 0, 0)
+            if lookup is not None:
+                files["icon"] = lookup.get_filename()
+
+        files["desktop"] = app.get_filename()
+        files["appimage"] = app.get_executable()
+        info["title"] = app.get_name()
+        info["description"] = app.get_description()
+        for p in self.db:
+            if p["title"] == info["title"]:
+                info["package"] = p["name"]
+            elif p["description"] == info["description"]:
+                info["package"] = p["name"]
+        return info
+
+
+    def get_installed(self):
+        installed = []
+        for app in Gio.AppInfo.get_all():
+            if self._is_appimage(app):
+                installed.append(app)
+        return installed
 
 
     def _build_db(self):
