@@ -1,4 +1,4 @@
-import json, re
+import re
 
 
 def glib_date_to_string(date):
