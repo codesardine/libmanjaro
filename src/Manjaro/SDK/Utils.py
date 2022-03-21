@@ -1,4 +1,6 @@
 import re
+import threading
+import multiprocessing
 
 
 def glib_date_to_string(date):
@@ -30,3 +32,25 @@ def convert_bytes_to_human(bytes):
         return f"{size}"
 
 
+def _async(func):
+    def wrapper(*args, **kwargs):
+        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+        thread.daemon = True
+        thread.start()
+        return thread
+    return wrapper
+
+
+def idle(func):
+    def wrapper(*args):
+        GLib.idle_add(func, *args)
+    return wrapper
+
+
+def process(func):
+    def wrapper(*args):
+        proc = multiprocessing.Process(target=func(args))
+        proc.start()
+        proc.join()  
+        return proc      
+    return wrapper

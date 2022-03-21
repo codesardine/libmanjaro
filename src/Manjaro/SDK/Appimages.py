@@ -15,14 +15,12 @@ class Appimage():
         self.install = []
         self.remove = []
         self.db = self._build_db()
-        i = self.get_installed()
-        for app in i:
-            print(self.get_installed_details(app))
+        
 
     def is_plugin_installed(self):
         return os.path.exists("/usr/bin/ail-cli")
 
-
+   
     def _get_json(self, provider):
         response = request.urlopen(provider)
         if response.status == 200:
@@ -54,6 +52,16 @@ class Appimage():
                 return False
 
 
+    def download(self, download, target):
+        request.urlretrieve(download, target)
+        self.integrate(target)
+
+
+    def integrate(self, target):
+        subprocess.run(["ail-cli", "integrate", target])
+
+
+    @Utils._async
     def transaction_install(self):
         for pkg in self.install:
             name = pkg.replace('.', '/')
@@ -64,8 +72,7 @@ class Appimage():
             file_name = assets[0]["name"]
             home = pathlib.Path.home()
             target = f"{home}/Downloads/{file_name}"
-            request.urlretrieve(download, target)
-            subprocess.run(["ail-cli", "integrate", target])
+            self.download(download, target)
 
 
     def transaction_remove(self):
