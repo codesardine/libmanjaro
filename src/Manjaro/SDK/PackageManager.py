@@ -14,11 +14,13 @@ class Pamac():
     def __init__(self, options={
         "config_path": "/etc/pamac.conf",
         "dry_run": False,
-        "upgrade": False
+        "upgrade": False,
+        "aur": False
     }):
         self.config = pamac.Config(conf_path=options["config_path"])
         self.options = options
         self.db = pamac.Database(config=self.config)
+        self.config.set_enable_aur(options["aur"])
         self.db.enable_appstream()
         self.data = None
         self.package = Package(self)
@@ -155,7 +157,8 @@ class Pamac():
         """
         for msg in (action, progress, status, message, details):
             if msg:
-                pass#print(msg)
+                pass
+                #print(msg)
 
 
     def on_emit_action(self, transaction, action, data):
