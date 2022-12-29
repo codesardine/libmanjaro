@@ -61,7 +61,6 @@ class Appimage():
         subprocess.run(["ail-cli", "integrate", target])
 
 
-    @Utils._async
     def transaction_install(self):
         for pkg in self.install:
             name = pkg.replace('.', '/')
@@ -87,10 +86,7 @@ class Appimage():
 
 
     def get_available(self):
-        pkgs = []
-        for app in self.db:
-            pkgs.append(app["name"])
-        return tuple(pkgs)
+        return tuple(self.db)
 
 
     def _is_appimage(self, app):
@@ -134,9 +130,8 @@ class Appimage():
 
     def _build_db(self):
         appimage = []
-        url = self._get_json(f"{self.provider}/feed.json")
-        data = url["items"]
-        for app in data:
+        feed = self._get_json(f"{self.provider}/feed.json")
+        for app in feed["items"]:
             app_data = {}
             try:
                 links = app["links"]
@@ -173,7 +168,8 @@ class Appimage():
                 except TypeError:
                     app_data["icon"] = None
 
-                appimage.append(app_data)
+                if app_data["name"] not in (p["name"] for p in appimage):
+                    appimage.append(app_data)
             except (TypeError, KeyError):
                 pass
         return appimage

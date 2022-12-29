@@ -27,7 +27,8 @@ class Package():
         for repo in self.pm.get_repos():
             repository = self.pm.db.get_repo_pkgs(repo)
             for pkg in repository:
-                db.append(pkg)
+                if pkg.get_name() not in (p.get_name() for p in db):
+                    db.append(pkg)
         return tuple(db)
 
     

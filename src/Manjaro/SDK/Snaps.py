@@ -73,19 +73,21 @@ class Snap():
         return info
 
     def get_available(self, db=[]):
-        def callback(source_object, result):
+        def on_category_ready(source_object, result):
             try:
-                snaps = source_object.get_category_snaps_finish(result)
+                pkgs = source_object.get_category_snaps_finish(result)
             except GLib.GError as e:
                 print("Error: ", e.message)
             else:
-                for pkg in snaps:
-                    db.append(pkg)
+                for pkg in pkgs:
+                    if pkg.get_name() not in (p.get_name() for p in db):
+                        db.append(pkg)
             finally:
                 self.pm.loop.quit()
 
-        for cat in self.pm.get_categories():
-            self.pm.db.get_category_snaps_async(cat, callback)
-            self.pm.loop.run()
+        for category in self.pm.get_categories():
+            if category !="Featured":
+                self.pm.db.get_category_snaps_async(category, on_category_ready)
+                self.pm.loop.run()
 
         return tuple(db)

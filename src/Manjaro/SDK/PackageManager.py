@@ -19,6 +19,7 @@ class Pamac():
     }):
         self.config = pamac.Config(conf_path=options["config_path"])
         self.options = options
+        self.config.set_enable_flatpak(True)
         self.db = pamac.Database(config=self.config)
         self.config.set_enable_aur(options["aur"])
         self.db.enable_appstream()
@@ -100,6 +101,13 @@ class Pamac():
         return all available flatpaks
         """
         return self.flatpak.get_available()
+
+
+    def get_all_appimages(self) -> list:
+        """
+        return all available appimages
+        """
+        return self.appimage.get_available()
 
 
     def add_pkgs_to_install(self, pkgs: list, pkg_format="packages"):
