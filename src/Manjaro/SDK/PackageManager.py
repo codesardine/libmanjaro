@@ -22,7 +22,6 @@ class Pamac():
         self.config.set_enable_flatpak(True)
         self.db = pamac.Database(config=self.config)
         self.config.set_enable_aur(options["aur"])
-        self.db.enable_appstream()
         self.data = None
         self.package = Package(self)
         self.snap = Snap(self)
